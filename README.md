@@ -1,26 +1,26 @@
 SWHttpTrafficRecorder provides an easy way to record all the HTTP traffic while the user is using your app at the same time. It can be used for different purposes, including recording the files and use them for mocking later on or logging an app's network activity for debugging purpose. 
 
-###### Installing In Your Projects
+### Installing In Your Projects
 
 The library contains only two files (SWHttpTrafficRecorder.h and SWHttpTrafficRecorder.m). So you can just drop them anywhere in your project and it is done. Will provide a CocoaPods spec later on.
 
-###### Usage Example
+### Usage Example
 
 Even though the tool is highly customizable, to start using the tool can not be simpler. It needs only one line of code: 
 
-######## Objective C: 
+###### Objective C: 
 
 ```
 [[SWHttpTrafficRecorder sharedRecorder] startRecordingAtPath:nil error:nil];
 ```    
 
-######## Swift: 
+###### Swift: 
 
 ```
 SWHttpTrafficRecorder.sharedRecorder().startRecordingAtPath(nil, error: nil)
 ```
 
-###### Customizable Features:
+### Customizable Features:
 
 * The recorded folder: default to caches system directory. Can be anywhere the folder is writable. 
 * Recording format: It has built-in support for two formats: Mocktail and response body only.  Can be customized to output in any format that you can implement. 
