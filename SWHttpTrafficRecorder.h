@@ -30,7 +30,8 @@
 typedef NS_ENUM(NSInteger, SWHTTPTrafficRecordingFormat) {
     SWHTTPTrafficRecordingFormatCustom = -1,
     SWHTTPTrafficRecordingFormatBodyOnly = 1,
-    SWHTTPTrafficRecordingFormatMocktail = 2
+    SWHTTPTrafficRecordingFormatMocktail = 2,
+    SWHTTPTrafficRecordingFormatHTTPMessage = 3
 };
 
 @interface SWHttpTrafficRecorder : NSObject

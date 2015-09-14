@@ -93,7 +93,8 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
 #pragma mark - NSURLProtocol overrides
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request {
-    if ([NSURLProtocol propertyForKey:SWRecordingLProtocolHandledKey inRequest:request]) {
+    BOOL isHTTP = [request.URL.scheme isEqualToString:@"https"] || [request.URL.scheme isEqualToString:@"http"];
+    if ([NSURLProtocol propertyForKey:SWRecordingLProtocolHandledKey inRequest:request] || !isHTTP) {
         return NO;
     }
     
@@ -149,6 +150,8 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
         [self createBodyOnlyFileWithRequest:request response:response data:self.mutableData atFilePath:path];
     } else if(format == SWHTTPTrafficRecordingFormatMocktail){
         [self createMocktailFileWithRequest:request response:response data:self.mutableData atFilePath:path];
+    } else if(format == SWHTTPTrafficRecordingFormatHTTPMessage){
+        [self createHTTPMessageFileWithRequest:request response:response data:self.mutableData atFilePath:path];
     } else if(format == SWHTTPTrafficRecordingFormatCustom && [SWHttpTrafficRecorder sharedRecorder].createFileInCustomFormatBlock != nil){
         [SWHttpTrafficRecorder sharedRecorder].createFileInCustomFormatBlock(request, response, self.mutableData, path);
     } else {
@@ -199,6 +202,8 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
         return @"json";
     } else if(format == SWHTTPTrafficRecordingFormatMocktail){
         return @"tail";
+    } else if(format == SWHTTPTrafficRecordingFormatHTTPMessage){
+        return @"response";
     }
     
     return @"txt";
@@ -303,5 +308,39 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     return urlPattern;
 }
 
+#pragma mark - HTTP Message File Creation
+
+-(void)createHTTPMessageFileWithRequest:(NSURLRequest*)request response:(NSHTTPURLResponse*)response data:(NSData*)data atFilePath:(NSString *)filePath
+{
+    NSMutableString *dataString = NSMutableString.new;
+    
+    [dataString appendFormat:@"%@\n", [self statusLineFromResponse:response]];
+     
+    NSDictionary *headers = response.allHeaderFields;
+    for(NSString *key in headers){
+        [dataString appendFormat:@"%@: %@\n", key, headers[key]];
+    }
+    
+    [dataString appendString:@"\n\n"];
+    
+    //data = [self doBase64:data request:request response:response];
+    
+    //data = [self doJSONPrettyPrint:data request:request response:response];
+    
+    [dataString appendFormat:@"%@", data ? [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding] : @""];
+    
+    BOOL created = [NSFileManager.defaultManager createFileAtPath:filePath contents:[dataString dataUsingEncoding:NSUTF8StringEncoding] attributes:nil];
+    if(created){
+        NSLog(@"HTTPMessage File created for url: %@ method: %@ status code: %ld at %@", request.URL.absoluteString, request.HTTPMethod, (long)response.statusCode, filePath);
+    } else {
+        NSLog(@"Failed to create mock for %@ at %@", request.URL.absoluteString, filePath);
+    }
+}
+
+- (NSString *)statusLineFromResponse:(NSHTTPURLResponse*)response{
+    CFHTTPMessageRef message = CFHTTPMessageCreateResponse(kCFAllocatorDefault, [response statusCode], NULL, kCFHTTPVersion1_1);
+    NSString *statusLine = (__bridge_transfer NSString *)CFHTTPMessageCopyResponseStatusLine(message);
+    return statusLine;
+}
 
 @end

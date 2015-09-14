@@ -23,7 +23,7 @@ SWHttpTrafficRecorder.sharedRecorder().startRecordingAtPath(nil, error: nil)
 ### Customizable Features:
 
 * The recorded folder: default to caches system directory. Can be anywhere the folder is writable. 
-* Recording format: It has built-in support for two formats: Mocktail and response body only.  Can be customized to output in any format that you can implement. 
+* Recording format: It has built-in support for 3 formats: Mocktail,  response body only and HTTP Raw Message(the format output by `curl -is`).  Can be customized to output in any format that you can implement. 
 * Whether to record or skip a HTTP request. 
 * Whether to base64 encode a response body. By default, only images are base64 encoded. 
 * The recorded file name. A file is recorded per each HTTP request and its file name can be customized. By default, it uses combination of the request's last path component and current time stamp. 
