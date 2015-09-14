@@ -1,4 +1,4 @@
-SWHttpTrafficRecorder provides an easy way to record all the HTTP traffic while the user is using your app at the same time. It can be used for different purposes, including recording the files and use them for mocking later on or logging an app's network activity for debugging purpose. 
+SWHttpTrafficRecorder provides an easy way to record all the HTTP traffic while the user is using your app at the same time. It can be used for different purposes, including recording the files to use them for mocking later on (see https://github.com/AliSoftware/OHHTTPStubs or https://github.com/puls/objc-mocktail for examples of how the recorded files can be used) or logging an app's network activity for debugging purpose. 
 
 ### Installing In Your Projects
 
@@ -25,9 +25,21 @@ SWHttpTrafficRecorder.sharedRecorder().startRecordingAtPath(nil, error: nil)
 * The recorded folder: default to caches system directory. Can be anywhere the folder is writable. 
 * Recording format: It has built-in support for two formats: Mocktail and response body only.  Can be customized to output in any format that you can implement. 
 * Whether to record or skip a HTTP request. 
-* Whether to base64 encode a request. By default, only images are base64 encoded. 
-* The recorded file name. A file is recorded per each HTTP request and its file name can be customized. By default, it uses the last path component and time stamp. 
+* Whether to base64 encode a response body. By default, only images are base64 encoded. 
+* The recorded file name. A file is recorded per each HTTP request and its file name can be customized. By default, it uses combination of the request's last path component and current time stamp. 
 * URL matching regular expression. This is only applicable to Mocktail format. The default is to use the path, and replace query parameter values as .*. 
    
     
+### TO-DO list
+
+If you can help with any of the following tasks, your effort would be highly appreciated: just make the change and submit a pull request.  
+
+* Check whether the path is writable at start recording.
+* Implement isNotValidFileName: Could some last path component contains invalid character?
+* Need to figure out whether it is possible to record an error in Mocktail format and if yes, how to do that. For now, simply log to the console.
+* Any other error handlings
+* Customizable header block?
+* Logging system so that it can be shown which requests failed to be recorded?
+* Documentation - README, and comments in header, in particular the customizable properites
+* Example project
 

@@ -25,18 +25,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
-/** TO-DOs:
- 1. Check whether the path is writable at start recording.
- 2. Implement isNotValidFileName: Could some last path component contains invalid character?
- 3. Need to figure out whether it is possible to record an error in Mocktail format and if yes, how to do that. For now, simply log to the console.
- 4. Any other error handlings
- 5. Customizable header block?
- 6. Logging system so that it can be shown which requests failed to be recorded?
- 7. Documentation - README, and comments in header, in particular the customizable properites
- 8. Example project
- */
-
 #import <Foundation/Foundation.h>
 
 typedef NS_ENUM(NSInteger, SWHTTPTrafficRecordingFormat) {
