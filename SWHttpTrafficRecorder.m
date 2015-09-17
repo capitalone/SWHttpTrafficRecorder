@@ -28,6 +28,13 @@
 
 #import "SWHttpTrafficRecorder.h"
 
+NSString * const SWHTTPTrafficRecordingProgressRequestKey   = @"REQUEST_KEY";
+NSString * const SWHTTPTrafficRecordingProgressResponseKey  = @"RESPONSE_KEY";
+NSString * const SWHTTPTrafficRecordingProgressBodyDataKey  = @"BODY_DATA_KEY";
+NSString * const SWHTTPTrafficRecordingProgressFilePathKey  = @"FILE_PATH_KEY";
+NSString * const SWHTTPTrafficRecordingProgressFileFormatKey= @"FILE_FORMAT_KEY";
+NSString * const SWHTTPTrafficRecordingProgressErrorKey     = @"ERROR_KEY";
+
 @interface SWRecordingProtocol : NSURLProtocol @end
 
 @interface SWHttpTrafficRecorder()
@@ -98,12 +105,17 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
         return NO;
     }
     
-    BOOL(^testBlock)(NSURLRequest *request) = [SWHttpTrafficRecorder sharedRecorder].recordingTestBlock;
-    if(testBlock){
-        return testBlock(request);
-    }
+    [self updateRecorderProgressDelegate:SWHTTPTrafficRecordingProgressReceived userInfo:@{SWHTTPTrafficRecordingProgressRequestKey: request}];
     
-    return YES;
+    BOOL(^testBlock)(NSURLRequest *request) = [SWHttpTrafficRecorder sharedRecorder].recordingTestBlock;
+    BOOL canInit = YES;
+    if(testBlock){
+        canInit = testBlock(request);
+    }
+    if(!canInit){
+        [self updateRecorderProgressDelegate:SWHTTPTrafficRecordingProgressSkipped userInfo:@{SWHTTPTrafficRecordingProgressRequestKey: request}];
+    }
+    return canInit;
 }
 
 + (NSURLRequest *) canonicalRequestForRequest:(NSURLRequest *)request {
@@ -113,6 +125,8 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
 - (void) startLoading {
     NSMutableURLRequest *newRequest = [self.request mutableCopy];
     [NSURLProtocol setProperty:@YES forKey:SWRecordingLProtocolHandledKey inRequest:newRequest];
+    
+    [self.class updateRecorderProgressDelegate:SWHTTPTrafficRecordingProgressStarted userInfo:@{SWHTTPTrafficRecordingProgressRequestKey: self.request}];
     
     self.connection = [NSURLConnection connectionWithRequest:newRequest delegate:self];
 }
@@ -143,8 +157,14 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     
     NSHTTPURLResponse *response = (NSHTTPURLResponse *)self.response;
     NSURLRequest *request = (NSURLRequest*)connection.currentRequest;
-    NSString *path = [self getFilePath:request response:response];
     
+    [self.class updateRecorderProgressDelegate:SWHTTPTrafficRecordingProgressLoaded
+                                      userInfo:@{SWHTTPTrafficRecordingProgressRequestKey: self.request,
+                                                 SWHTTPTrafficRecordingProgressResponseKey: self.response,
+                                                 SWHTTPTrafficRecordingProgressBodyDataKey: self.mutableData
+                                                 }];
+    
+    NSString *path = [self getFilePath:request response:response];
     SWHTTPTrafficRecordingFormat format = [SWHttpTrafficRecorder sharedRecorder].recordingFormat;
     if(format == SWHTTPTrafficRecordingFormatBodyOnly){
         [self createBodyOnlyFileWithRequest:request response:response data:self.mutableData atFilePath:path];
@@ -162,8 +182,10 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
     [self.client URLProtocol:self didFailWithError:error];
     
-    //write out the error and save it to disk file
-    [self createMocktailFileWithRequest:connection.currentRequest response:(NSHTTPURLResponse*)self.response error:error];
+    [self.class updateRecorderProgressDelegate:SWHTTPTrafficRecordingProgressFailedToLoad
+                                      userInfo:@{SWHTTPTrafficRecordingProgressRequestKey: self.request,
+                                                 SWHTTPTrafficRecordingProgressErrorKey: error
+                                                 }];
 }
 
 #pragma mark - File Creation Utility Methods
@@ -251,11 +273,13 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     data = [self doJSONPrettyPrint:data request:request response:response];
     
     BOOL created = [NSFileManager.defaultManager createFileAtPath:filePath contents:data attributes:nil];
-    if(created){
-        NSLog(@"BodyOnly File created for url: %@ method: %@ status code: %ld at %@", request.URL.absoluteString, request.HTTPMethod, (long)response.statusCode, filePath);
-    } else {
-        NSLog(@"Failed to create mock for %@ at %@", request.URL.absoluteString, filePath);
-    }
+    [self.class updateRecorderProgressDelegate:created ? SWHTTPTrafficRecordingProgressRecorded : SWHTTPTrafficRecordingProgressFailedToRecord
+                                      userInfo:@{SWHTTPTrafficRecordingProgressRequestKey: self.request,
+                                                 SWHTTPTrafficRecordingProgressResponseKey: self.response,
+                                                 SWHTTPTrafficRecordingProgressBodyDataKey: self.mutableData,
+                                                 SWHTTPTrafficRecordingProgressFileFormatKey: @(SWHTTPTrafficRecordingFormatBodyOnly),
+                                                 SWHTTPTrafficRecordingProgressFilePathKey: filePath
+                                                 }];
 }
 
 #pragma mark - Mocktail File Creation
@@ -275,15 +299,13 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     [tail appendFormat:@"%@", data ? [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding] : @""];
     
     BOOL created = [NSFileManager.defaultManager createFileAtPath:filePath contents:[tail dataUsingEncoding:NSUTF8StringEncoding] attributes:nil];
-    if(created){
-        NSLog(@"Mocktail File created for url: %@ method: %@ status code: %ld at %@", request.URL.absoluteString, request.HTTPMethod, (long)response.statusCode, filePath);
-    } else {
-        NSLog(@"Failed to create mock for %@ at %@", request.URL.absoluteString, filePath);
-    }
-}
-
--(void)createMocktailFileWithRequest:(NSURLRequest*)request response:(NSHTTPURLResponse*)response error:(NSError *)error{
-    NSLog(@"Error '%@' reponse for request:%@", error.localizedDescription, request.URL.absoluteString);
+    [self.class updateRecorderProgressDelegate:created ? SWHTTPTrafficRecordingProgressRecorded : SWHTTPTrafficRecordingProgressFailedToRecord
+                                      userInfo:@{SWHTTPTrafficRecordingProgressRequestKey: self.request,
+                                                 SWHTTPTrafficRecordingProgressResponseKey: self.response,
+                                                 SWHTTPTrafficRecordingProgressBodyDataKey: self.mutableData,
+                                                 SWHTTPTrafficRecordingProgressFileFormatKey: @(SWHTTPTrafficRecordingFormatMocktail),
+                                                 SWHTTPTrafficRecordingProgressFilePathKey: filePath
+                                                 }];
 }
 
 -(NSString *)getURLRegexPattern:(NSURLRequest *)request{
@@ -323,24 +345,31 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     
     [dataString appendString:@"\n\n"];
     
-    //data = [self doBase64:data request:request response:response];
-    
-    //data = [self doJSONPrettyPrint:data request:request response:response];
-    
     [dataString appendFormat:@"%@", data ? [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding] : @""];
     
     BOOL created = [NSFileManager.defaultManager createFileAtPath:filePath contents:[dataString dataUsingEncoding:NSUTF8StringEncoding] attributes:nil];
-    if(created){
-        NSLog(@"HTTPMessage File created for url: %@ method: %@ status code: %ld at %@", request.URL.absoluteString, request.HTTPMethod, (long)response.statusCode, filePath);
-    } else {
-        NSLog(@"Failed to create mock for %@ at %@", request.URL.absoluteString, filePath);
-    }
+    [self.class updateRecorderProgressDelegate:created ? SWHTTPTrafficRecordingProgressRecorded : SWHTTPTrafficRecordingProgressFailedToRecord
+                                      userInfo:@{SWHTTPTrafficRecordingProgressRequestKey: self.request,
+                                                 SWHTTPTrafficRecordingProgressResponseKey: self.response,
+                                                 SWHTTPTrafficRecordingProgressBodyDataKey: self.mutableData,
+                                                 SWHTTPTrafficRecordingProgressFileFormatKey: @(SWHTTPTrafficRecordingFormatHTTPMessage),
+                                                 SWHTTPTrafficRecordingProgressFilePathKey: filePath
+                                                 }];
 }
 
 - (NSString *)statusLineFromResponse:(NSHTTPURLResponse*)response{
     CFHTTPMessageRef message = CFHTTPMessageCreateResponse(kCFAllocatorDefault, [response statusCode], NULL, kCFHTTPVersion1_1);
     NSString *statusLine = (__bridge_transfer NSString *)CFHTTPMessageCopyResponseStatusLine(message);
     return statusLine;
+}
+
+#pragma mark - Recording Progress 
+
++ (void)updateRecorderProgressDelegate:(SWHTTPTrafficRecordingProgressKind)progress userInfo:(NSDictionary *)info{
+    SWHttpTrafficRecorder *recorder = [SWHttpTrafficRecorder sharedRecorder];
+    if(recorder.progressDelegate && [recorder.progressDelegate respondsToSelector:@selector(updateRecordingProgress:userInfo:)]){
+        [recorder.progressDelegate updateRecordingProgress:progress userInfo:info];
+    }
 }
 
 @end

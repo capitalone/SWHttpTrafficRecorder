@@ -34,6 +34,29 @@ typedef NS_ENUM(NSInteger, SWHTTPTrafficRecordingFormat) {
     SWHTTPTrafficRecordingFormatHTTPMessage = 3
 };
 
+typedef NS_ENUM(NSInteger, SWHTTPTrafficRecordingProgressKind) {
+    SWHTTPTrafficRecordingProgressReceived = 1,
+    SWHTTPTrafficRecordingProgressSkipped = 2,
+    SWHTTPTrafficRecordingProgressStarted = 3,
+    SWHTTPTrafficRecordingProgressLoaded = 4,
+    SWHTTPTrafficRecordingProgressRecorded = 5,
+    SWHTTPTrafficRecordingProgressFailedToLoad = 6,
+    SWHTTPTrafficRecordingProgressFailedToRecord = 7
+};
+
+FOUNDATION_EXPORT NSString * const SWHTTPTrafficRecordingProgressRequestKey;
+FOUNDATION_EXPORT NSString * const SWHTTPTrafficRecordingProgressResponseKey;
+FOUNDATION_EXPORT NSString * const SWHTTPTrafficRecordingProgressBodyDataKey;
+FOUNDATION_EXPORT NSString * const SWHTTPTrafficRecordingProgressFilePathKey;
+FOUNDATION_EXPORT NSString * const SWHTTPTrafficRecordingProgressFileFormatKey;
+FOUNDATION_EXPORT NSString * const SWHTTPTrafficRecordingProgressErrorKey;
+
+@protocol SWHttpTrafficRecordingProgressDelegate <NSObject>
+
+- (void)updateRecordingProgress:(SWHTTPTrafficRecordingProgressKind)currentProgress userInfo:(NSDictionary *)info;
+
+@end
+
 @interface SWHttpTrafficRecorder : NSObject
 
 + (instancetype)sharedRecorder;
@@ -44,7 +67,7 @@ typedef NS_ENUM(NSInteger, SWHTTPTrafficRecordingFormat) {
 @property(nonatomic, readonly, assign) BOOL isRecording;
 
 @property(nonatomic, assign) SWHTTPTrafficRecordingFormat recordingFormat;
-
+@property(nonatomic, assign) id<SWHttpTrafficRecordingProgressDelegate> progressDelegate;
 @property(nonatomic, copy) BOOL(^recordingTestBlock)(NSURLRequest *request);
 @property(nonatomic, copy) BOOL(^base64TestBlock)(NSURLRequest *request, NSURLResponse *response);
 @property(nonatomic, copy) NSString*(^fileNamingBlock)(NSURLRequest *request, NSString *defaultName);
