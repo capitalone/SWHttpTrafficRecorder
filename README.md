@@ -36,10 +36,8 @@ If you can help with any of the following tasks, your effort would be highly app
 
 * Check whether the path is writable at start recording.
 * Implement isNotValidFileName: Could some last path component contains invalid character?
-* Need to figure out whether it is possible to record an error in Mocktail format and if yes, how to do that. For now, simply log to the console.
+* Need to figure out whether it is possible to record an error in Mocktail format and if yes, how to do that. 
 * Any other error handlings
 * Customizable header block?
-* Logging system so that it can be shown which requests failed to be recorded?
 * Documentation - README, and comments in header, in particular the customizable properites
-* Example project
 
