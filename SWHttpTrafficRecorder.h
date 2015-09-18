@@ -60,6 +60,8 @@ FOUNDATION_EXPORT NSString * const SWHTTPTrafficRecordingProgressErrorKey;
 @interface SWHttpTrafficRecorder : NSObject
 
 + (instancetype)sharedRecorder;
+- (void)startRecording;
+- (void)startRecordingAtPath:(NSString*)recordingPath;
 - (void)startRecordingAtPath:(NSString*)recordingPath error:(NSError **)error;
 - (void)stopRecording;
 

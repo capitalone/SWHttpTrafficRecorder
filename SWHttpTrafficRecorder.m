@@ -56,6 +56,14 @@ NSString * const SWHTTPTrafficRecordingProgressErrorKey     = @"ERROR_KEY";
     return shared;
 }
 
+- (void)startRecording{
+    [self startRecordingAtPath:nil error:nil];
+}
+
+- (void)startRecordingAtPath:(NSString*)recordingPath{
+    [self startRecordingAtPath:recordingPath error:nil];
+}
+
 - (void)startRecordingAtPath:(NSString *)path error:(NSError **)error{
     if(!self.isRecording){
         if(path){
