@@ -11,13 +11,13 @@ Even though the tool is highly customizable, to start using the tool can not be 
 ###### Objective C: 
 
 ```
-[[SWHttpTrafficRecorder sharedRecorder] startRecordingAtPath:nil error:nil];
+[[SWHttpTrafficRecorder sharedRecorder] startRecording];
 ```    
 
 ###### Swift: 
 
 ```
-SWHttpTrafficRecorder.sharedRecorder().startRecordingAtPath(nil, error: nil)
+SWHttpTrafficRecorder.sharedRecorder().startRecording()
 ```
 
 ### Customizable Features:
