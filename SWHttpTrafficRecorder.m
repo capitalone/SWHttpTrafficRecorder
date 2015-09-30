@@ -262,6 +262,10 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     return bodyData;
 }
 
+-(BOOL)createFileAt:(NSString *)filePath usingData:(NSData *)data{
+    return [NSFileManager.defaultManager createFileAtPath:filePath contents:data attributes:[NSDictionary dictionaryWithObject:NSFileProtectionComplete forKey:NSFileProtectionKey]];
+}
+
 #pragma mark - BodyOnly File Creation
 
 -(void)createBodyOnlyFileWithRequest:(NSURLRequest*)request response:(NSHTTPURLResponse*)response data:(NSData*)data atFilePath:(NSString *)filePath
@@ -270,7 +274,8 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     
     data = [self doJSONPrettyPrint:data request:request response:response];
     
-    BOOL created = [NSFileManager.defaultManager createFileAtPath:filePath contents:data attributes:nil];
+    BOOL created = [self createFileAt:filePath usingData:data];
+    
     [self.class updateRecorderProgressDelegate:created ? SWHTTPTrafficRecordingProgressRecorded : SWHTTPTrafficRecordingProgressFailedToRecord
                                       userInfo:@{SWHTTPTrafficRecordingProgressRequestKey: self.request,
                                                  SWHTTPTrafficRecordingProgressResponseKey: self.response,
@@ -296,7 +301,8 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     
     [tail appendFormat:@"%@", data ? [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding] : @""];
     
-    BOOL created = [NSFileManager.defaultManager createFileAtPath:filePath contents:[tail dataUsingEncoding:NSUTF8StringEncoding] attributes:nil];
+    BOOL created =  [self createFileAt:filePath usingData:[tail dataUsingEncoding:NSUTF8StringEncoding]];
+    
     [self.class updateRecorderProgressDelegate:created ? SWHTTPTrafficRecordingProgressRecorded : SWHTTPTrafficRecordingProgressFailedToRecord
                                       userInfo:@{SWHTTPTrafficRecordingProgressRequestKey: self.request,
                                                  SWHTTPTrafficRecordingProgressResponseKey: self.response,
@@ -345,7 +351,8 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     
     [dataString appendFormat:@"%@", data ? [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding] : @""];
     
-    BOOL created = [NSFileManager.defaultManager createFileAtPath:filePath contents:[dataString dataUsingEncoding:NSUTF8StringEncoding] attributes:nil];
+    BOOL created =  [self createFileAt:filePath usingData:[dataString dataUsingEncoding:NSUTF8StringEncoding]];
+    
     [self.class updateRecorderProgressDelegate:created ? SWHTTPTrafficRecordingProgressRecorded : SWHTTPTrafficRecordingProgressFailedToRecord
                                       userInfo:@{SWHTTPTrafficRecordingProgressRequestKey: self.request,
                                                  SWHTTPTrafficRecordingProgressResponseKey: self.response,
