@@ -29,7 +29,10 @@ SWHttpTrafficRecorder.sharedRecorder().startRecording()
 * The recorded file name. A file is recorded per each HTTP request and its file name can be customized. By default, it uses combination of the request's last path component and current time stamp. 
 * URL matching regular expression. This is only applicable to Mocktail format. The default is to use the path, and replace query parameter values as .*. 
    
-    
+### Security Consideration
+
+While creating files for HTTP(s) requests, the recorder uses NSFileProtectionComplete for NSFileProtectionKey attribute to improve the file security. It is a generic tool that is designed to record and monitor traffic acitivity, however, each app may apply its own discretion over what to record and monitor based on its own policy and regulation. 
+
 ### TO-DO list
 
 If you can help with any of the following tasks, your effort would be highly appreciated: just make the change and submit a pull request.  
