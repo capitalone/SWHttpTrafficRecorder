@@ -33,14 +33,6 @@ SWHttpTrafficRecorder.sharedRecorder().startRecording()
 
 While creating files for HTTP(s) requests, the recorder uses NSFileProtectionComplete for NSFileProtectionKey attribute to improve the file security. It is a generic tool that is designed to record and monitor traffic acitivity, however, each app may apply its own discretion over what to record and monitor based on its own policy and regulation. 
 
-### TO-DO list
+### Contributions
 
-If you can help with any of the following tasks, your effort would be highly appreciated: just make the change and submit a pull request.  
-
-* Check whether the path is writable at start recording.
-* Implement isNotValidFileName: Could some last path component contains invalid character?
-* Need to figure out whether it is possible to record an error in Mocktail format and if yes, how to do that. 
-* Any other error handlings
-* Customizable header block?
-* Documentation - README, and comments in header, in particular the customizable properites
-
+SWHttpTrafficRecorder is in its very early stage. Pull requests/new issues/comments/questions are welcome.

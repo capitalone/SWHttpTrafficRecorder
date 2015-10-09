@@ -40,6 +40,16 @@ typedef NS_ENUM(NSInteger, SWHTTPTrafficRecordingFormat) {
 };
 
 /**
+ * Error codes for SWHttpTrafficRecorder.
+ */
+typedef NS_ENUM(NSInteger, SWHttpTrafficRecorderError) {
+    /** The specified path does not exist and cannot be created */
+    SWHttpTrafficRecorderErrorPathFailedToCreate = 1,
+    /** The specified path was not writable */
+    SWHttpTrafficRecorderErrorPathNotWritable
+};
+
+/**
  * Recording progress that is reported by SWHttpTrafficRecorder at each phase of recording a request and its response.
  */
 typedef NS_ENUM(NSInteger, SWHTTPTrafficRecordingProgressKind) {
@@ -82,6 +92,9 @@ FOUNDATION_EXPORT NSString * const SWHTTPTrafficRecordingProgressFileFormatKey;
 
 /* The key in a recording progress info dictionary whose value indicates the NSErrror which fails the recording.*/
 FOUNDATION_EXPORT NSString * const SWHTTPTrafficRecordingProgressErrorKey;
+
+/* The error domain for SWHttpTrafficRecorder. */
+FOUNDATION_EXPORT NSString * const SWHttpTrafficRecorderErrorDomain;
 
 /** An optional delegate SWHttpTrafficRecorder uses to report its recording progress.
  */

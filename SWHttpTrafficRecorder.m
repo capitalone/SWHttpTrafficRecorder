@@ -29,6 +29,8 @@ NSString * const SWHTTPTrafficRecordingProgressFilePathKey  = @"FILE_PATH_KEY";
 NSString * const SWHTTPTrafficRecordingProgressFileFormatKey= @"FILE_FORMAT_KEY";
 NSString * const SWHTTPTrafficRecordingProgressErrorKey     = @"ERROR_KEY";
 
+NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_DOMAIN";
+
 @interface SWRecordingProtocol : NSURLProtocol @end
 
 @interface SWHttpTrafficRecorder()
@@ -62,6 +64,18 @@ NSString * const SWHTTPTrafficRecordingProgressErrorKey     = @"ERROR_KEY";
     if(!self.isRecording){
         if(path){
             self.recordingPath = path;
+            NSFileManager *fileManager = [NSFileManager defaultManager];
+            if(![fileManager fileExistsAtPath:path]){
+                NSError *bError = nil;
+                [fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&bError];
+                if(bError){
+                    *error = [NSError errorWithDomain:SWHttpTrafficRecorderErrorDomain code:SWHttpTrafficRecorderErrorPathFailedToCreate userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Path '%@' does not exist and error while creating it.", path]}];
+                    return;
+                }
+            } else if(![fileManager isWritableFileAtPath:path]){
+                *error = [NSError errorWithDomain:SWHttpTrafficRecorderErrorDomain code:SWHttpTrafficRecorderErrorPathNotWritable userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Path '%@' is not writable.", path]}];
+                return;
+            }
         } else {
             self.recordingPath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
         }
@@ -365,6 +379,8 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     }
     
     [dataString appendString:@"\n\n"];
+    
+    data = [self doBase64:data request:request response:response];
     
     [dataString appendFormat:@"%@", data ? [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding] : @""];
     
