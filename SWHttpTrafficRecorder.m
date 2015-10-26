@@ -36,7 +36,7 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
 @property(nonatomic, strong) NSString *recordingPath;
 @property(nonatomic, assign) int fileNo;
 @property(nonatomic, strong) NSOperationQueue *fileCreationQueue;
-@property(nonatomic) NSURLSessionConfiguration *sessionConfig;
+@property(nonatomic, strong) NSURLSessionConfiguration *sessionConfig;
 @end
 
 @interface SWRecordingProtocol : NSURLProtocol @end
@@ -61,24 +61,24 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
     [self startRecordingAtPath:nil forSessionConfiguration:nil error:nil];
 }
 
-- (void)startRecordingAtPath:(NSString *)path error:(NSError **) error {
-    [self startRecordingAtPath:path forSessionConfiguration:nil error:error];
+- (void)startRecordingAtPath:(NSString *)recordingPath error:(NSError **) error {
+    [self startRecordingAtPath:recordingPath forSessionConfiguration:nil error:error];
 }
 
-- (void)startRecordingAtPath:(NSString *)path forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig error:(NSError **) error {
+- (void)startRecordingAtPath:(NSString *)recordingPath forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig error:(NSError **) error {
     if(!self.isRecording){
-        if(path){
-            self.recordingPath = path;
+        if(recordingPath){
+            self.recordingPath = recordingPath;
             NSFileManager *fileManager = [NSFileManager defaultManager];
-            if(![fileManager fileExistsAtPath:path]){
+            if(![fileManager fileExistsAtPath:recordingPath]){
                 NSError *bError = nil;
-                [fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&bError];
+                [fileManager createDirectoryAtPath:recordingPath withIntermediateDirectories:YES attributes:nil error:&bError];
                 if(bError){
-                    *error = [NSError errorWithDomain:SWHttpTrafficRecorderErrorDomain code:SWHttpTrafficRecorderErrorPathFailedToCreate userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Path '%@' does not exist and error while creating it.", path]}];
+                    *error = [NSError errorWithDomain:SWHttpTrafficRecorderErrorDomain code:SWHttpTrafficRecorderErrorPathFailedToCreate userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Path '%@' does not exist and error while creating it.", recordingPath]}];
                     return;
                 }
-            } else if(![fileManager isWritableFileAtPath:path]){
-                *error = [NSError errorWithDomain:SWHttpTrafficRecorderErrorDomain code:SWHttpTrafficRecorderErrorPathNotWritable userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Path '%@' is not writable.", path]}];
+            } else if(![fileManager isWritableFileAtPath:recordingPath]){
+                *error = [NSError errorWithDomain:SWHttpTrafficRecorderErrorDomain code:SWHttpTrafficRecorderErrorPathNotWritable userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Path '%@' is not writable.", recordingPath]}];
                 return;
             }
         } else {

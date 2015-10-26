@@ -120,24 +120,24 @@ FOUNDATION_EXPORT NSString * const SWHttpTrafficRecorderErrorDomain;
 + (instancetype)sharedRecorder;
 
 /**
- *  Method to start recording using default path and session configuration.
+ *  Method to start recording using default path.
  */
 - (void)startRecording;
 
 /**
- *  Method to start recording and saves recorded files at a specified location using default session configuration.
+ *  Method to start recording and saves recorded files at a specified location.
  *  @param path The path where recorded files are saved.
  *  @param error An out value that returns any error encountered while accessing the recordingPath. Returns an NSError object if any error; otherwise returns nil.
  */
-- (void)startRecordingAtPath:(NSString *)path error:(NSError **) error;
+- (void)startRecordingAtPath:(NSString *)recordingPath error:(NSError **) error;
 
 /**
  *  Method to start recording and saves recorded files at a specified location using default session configuration.
- *  @param path The path where recorded files are saved.
+ *  @param recordingPath The path where recorded files are saved.
  *  @param sessionConfig The NSURLSessionConfiguration which will be modified.
  *  @param error An out value that returns any error encountered while accessing the recordingPath. Returns an NSError object if any error; otherwise returns nil.
  */
-- (void)startRecordingAtPath:(NSString *)path forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig error:(NSError **) error;
+- (void)startRecordingAtPath:(NSString *)recordingPath forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig error:(NSError **) error;
 
 /**
  *  Method to stop recording.
