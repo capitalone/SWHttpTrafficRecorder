@@ -36,6 +36,7 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
 @property(nonatomic, strong) NSString *recordingPath;
 @property(nonatomic, assign) int fileNo;
 @property(nonatomic, strong) NSOperationQueue *fileCreationQueue;
+@property(nonatomic) NSURLSessionConfiguration *sessionConfig;
 @end
 
 @interface SWRecordingProtocol : NSURLProtocol @end
@@ -64,7 +65,7 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
     [self startRecordingAtPath:path forSessionConfiguration:nil error:error];
 }
 
-- (void)startRecordingAtPath:(NSString *)path forSessionConfiguration:(NSURLSessionConfiguration *)session error:(NSError **) error {
+- (void)startRecordingAtPath:(NSString *)path forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig error:(NSError **) error {
     if(!self.isRecording){
         if(path){
             self.recordingPath = path;
@@ -83,10 +84,11 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
         } else {
             self.recordingPath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
         }
-        if(session){
-            NSMutableArray *temp = [[NSMutableArray alloc] initWithArray:session.protocolClasses];
-            [temp insertObject:[SWRecordingProtocol class] atIndex:0];
-            session.protocolClasses = temp;
+        if(sessionConfig){
+            self.sessionConfig = sessionConfig;
+            NSMutableArray *mutableProtocols = [[NSMutableArray alloc] initWithArray:sessionConfig.protocolClasses];
+            [mutableProtocols insertObject:[SWRecordingProtocol class] atIndex:0];
+            sessionConfig.protocolClasses = mutableProtocols;
         }
         else {
             [NSURLProtocol registerClass:[SWRecordingProtocol class]];
@@ -98,14 +100,18 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
 
 - (void)stopRecording{
     if(self.isRecording){
+        if(self.sessionConfig) {
+            NSMutableArray *mutableProtocols = [[NSMutableArray alloc] initWithArray:self.sessionConfig.protocolClasses];
+            [mutableProtocols removeObject:[SWRecordingProtocol class]];
+            self.sessionConfig.protocolClasses = mutableProtocols;
+            self.sessionConfig = nil;
+        }
+        else {
             [NSURLProtocol unregisterClass:[SWRecordingProtocol class]];
+        }
+        
     }
     self.isRecording = NO;
-}
--(void)stopRecordingUsingConfiguration: (NSURLSessionConfiguration *) session {
-    NSMutableArray *temp = [[NSMutableArray alloc] initWithArray:session.protocolClasses];
-    [temp removeObject:[SWRecordingProtocol class]];
-    session.protocolClasses = temp;
 }
 
 - (int)increaseFileNo{
