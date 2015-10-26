@@ -31,14 +31,15 @@ NSString * const SWHTTPTrafficRecordingProgressErrorKey     = @"ERROR_KEY";
 
 NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_DOMAIN";
 
-@interface SWRecordingProtocol : NSURLProtocol @end
-
 @interface SWHttpTrafficRecorder()
 @property(nonatomic, assign, readwrite) BOOL isRecording;
 @property(nonatomic, strong) NSString *recordingPath;
 @property(nonatomic, assign) int fileNo;
 @property(nonatomic, strong) NSOperationQueue *fileCreationQueue;
+@property(nonatomic, strong) NSURLSessionConfiguration *sessionConfig;
 @end
+
+@interface SWRecordingProtocol : NSURLProtocol @end
 
 @implementation SWHttpTrafficRecorder
 
@@ -57,30 +58,41 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
 }
 
 - (void)startRecording{
-    [self startRecordingAtPath:nil error:nil];
+    [self startRecordingAtPath:nil forSessionConfiguration:nil error:nil];
 }
 
-- (void)startRecordingAtPath:(NSString *)path error:(NSError **)error{
+- (void)startRecordingAtPath:(NSString *)recordingPath error:(NSError **) error {
+    [self startRecordingAtPath:recordingPath forSessionConfiguration:nil error:error];
+}
+
+- (void)startRecordingAtPath:(NSString *)recordingPath forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig error:(NSError **) error {
     if(!self.isRecording){
-        if(path){
-            self.recordingPath = path;
+        if(recordingPath){
+            self.recordingPath = recordingPath;
             NSFileManager *fileManager = [NSFileManager defaultManager];
-            if(![fileManager fileExistsAtPath:path]){
+            if(![fileManager fileExistsAtPath:recordingPath]){
                 NSError *bError = nil;
-                [fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&bError];
+                [fileManager createDirectoryAtPath:recordingPath withIntermediateDirectories:YES attributes:nil error:&bError];
                 if(bError){
-                    *error = [NSError errorWithDomain:SWHttpTrafficRecorderErrorDomain code:SWHttpTrafficRecorderErrorPathFailedToCreate userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Path '%@' does not exist and error while creating it.", path]}];
+                    *error = [NSError errorWithDomain:SWHttpTrafficRecorderErrorDomain code:SWHttpTrafficRecorderErrorPathFailedToCreate userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Path '%@' does not exist and error while creating it.", recordingPath]}];
                     return;
                 }
-            } else if(![fileManager isWritableFileAtPath:path]){
-                *error = [NSError errorWithDomain:SWHttpTrafficRecorderErrorDomain code:SWHttpTrafficRecorderErrorPathNotWritable userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Path '%@' is not writable.", path]}];
+            } else if(![fileManager isWritableFileAtPath:recordingPath]){
+                *error = [NSError errorWithDomain:SWHttpTrafficRecorderErrorDomain code:SWHttpTrafficRecorderErrorPathNotWritable userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Path '%@' is not writable.", recordingPath]}];
                 return;
             }
         } else {
             self.recordingPath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
         }
-        
-        [NSURLProtocol registerClass:[SWRecordingProtocol class]];
+        if(sessionConfig){
+            self.sessionConfig = sessionConfig;
+            NSMutableArray *mutableProtocols = [[NSMutableArray alloc] initWithArray:sessionConfig.protocolClasses];
+            [mutableProtocols insertObject:[SWRecordingProtocol class] atIndex:0];
+            sessionConfig.protocolClasses = mutableProtocols;
+        }
+        else {
+            [NSURLProtocol registerClass:[SWRecordingProtocol class]];
+        }
     }
     self.isRecording = YES;
 }
@@ -88,7 +100,16 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
 
 - (void)stopRecording{
     if(self.isRecording){
-        [NSURLProtocol unregisterClass:[SWRecordingProtocol class]];
+        if(self.sessionConfig) {
+            NSMutableArray *mutableProtocols = [[NSMutableArray alloc] initWithArray:self.sessionConfig.protocolClasses];
+            [mutableProtocols removeObject:[SWRecordingProtocol class]];
+            self.sessionConfig.protocolClasses = mutableProtocols;
+            self.sessionConfig = nil;
+        }
+        else {
+            [NSURLProtocol unregisterClass:[SWRecordingProtocol class]];
+        }
+        
     }
     self.isRecording = NO;
 }
@@ -338,6 +359,7 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
 -(void)createMocktailFileWithRequest:(NSURLRequest*)request response:(NSHTTPURLResponse*)response data:(NSData*)data atFilePath:(NSString *)filePath
 {
     NSMutableString *tail = NSMutableString.new;
+    
     [tail appendFormat:@"%@\n", request.HTTPMethod];
     [tail appendFormat:@"%@\n", [self getURLRegexPattern:request]];
     [tail appendFormat:@"%ld\n", (long)response.statusCode];
