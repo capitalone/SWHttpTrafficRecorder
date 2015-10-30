@@ -38,7 +38,6 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
 @property(nonatomic, strong) NSOperationQueue *fileCreationQueue;
 @property(nonatomic, strong) NSURLSessionConfiguration *sessionConfig;
 @property(nonatomic, strong) NSMutableDictionary *replacementDict;
-@property(nonatomic, assign) NSUInteger uniqueSessionNumber;
 @end
 
 @interface SWRecordingProtocol : NSURLProtocol @end
@@ -54,7 +53,6 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
         shared.isRecording = NO;
         shared.fileNo = 0;
         shared.fileCreationQueue = [[NSOperationQueue alloc] init];
-        shared.uniqueSessionNumber = (NSUInteger)[NSDate timeIntervalSinceReferenceDate];
         shared.recordingFormat = SWHTTPTrafficRecordingFormatMocktail;
     });
     return shared;
@@ -294,7 +292,7 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
         fileName = @"Mocktail";
     }
 
-    fileName = [NSString stringWithFormat:@"%@_%ld_%d", fileName, [[SWHttpTrafficRecorder sharedRecorder] uniqueSessionNumber], [[SWHttpTrafficRecorder sharedRecorder] increaseFileNo]];
+    fileName = [NSString stringWithFormat:@"%@_%ld_%d", fileName,  (long)[NSDate timeIntervalSinceReferenceDate], [[SWHttpTrafficRecorder sharedRecorder] increaseFileNo]];
     
     NSString *(^fileNamingBlock)(NSURLRequest *request, NSString *defaultName) = [SWHttpTrafficRecorder sharedRecorder].fileNamingBlock;
     
@@ -400,12 +398,7 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     [tail appendFormat:@"%@\n", request.HTTPMethod];
     [tail appendFormat:@"%@\n", [self getURLRegexPattern:request]];
     [tail appendFormat:@"%ld\n", (long)response.statusCode];
-    NSEnumerator *headerKeys = [response.allHeaderFields keyEnumerator];
-    for (NSString *key in headerKeys) {
-        [tail appendFormat:@"%@: %@\n", key, (NSString*)[response.allHeaderFields objectForKey:key]];
-    }
-    
-    [tail appendString:@"\n"];
+    [tail appendFormat:@"%@%@\n\n", response.MIMEType, [self toBase64Body:request andResponse:response] ? @";base64": @""];
     
     data = [self doBase64:data request:request response:response];
     
@@ -441,25 +434,7 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
 }
 
 -(NSString *)getURLRegexPattern:(NSURLRequest *)request{
-    NSString *urlPattern = request.URL.absoluteString;
-    if (request.URL.query != nil && request.URL.query.length > 0) {
-        urlPattern = [urlPattern stringByReplacingOccurrencesOfString:request.URL.query withString:@""];
-    }
-    
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"/"
-                                                                           options:NSRegularExpressionCaseInsensitive
-                                                                             error:nil];
-    NSArray *matches = [regex matchesInString:urlPattern
-                                      options:NSMatchingReportCompletion
-                                        range:NSMakeRange(0, urlPattern.length)];
-    
-    if ([matches count] <= 2) {
-        return nil;
-    }
-    
-    urlPattern = [urlPattern substringFromIndex:((NSTextCheckingResult*)matches[2]).range.location];
-    urlPattern = [urlPattern substringToIndex:(urlPattern.length - 1)];
-    
+    NSString *urlPattern = request.URL.path;
     if(request.URL.query){
         NSArray *queryArray = [request.URL.query componentsSeparatedByString:@"&"];
         NSMutableArray *processedQueryArray = [[NSMutableArray alloc] initWithCapacity:queryArray.count];
@@ -468,7 +443,7 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
             part = [urlRegex stringByReplacingMatchesInString:part options:0 range:NSMakeRange(0, part.length) withTemplate:@"$1=.*"];
             [processedQueryArray addObject:part];
         }];
-        urlPattern = [NSString stringWithFormat:@"%@\\?%@", urlPattern, [processedQueryArray componentsJoinedByString:@"&"]];
+        urlPattern = [NSString stringWithFormat:@"%@\\?%@", request.URL.path, [processedQueryArray componentsJoinedByString:@"&"]];
     }
     
     NSString *(^urlRegexPatternBlock)(NSURLRequest *request, NSString *defaultPattern) = [SWHttpTrafficRecorder sharedRecorder].urlRegexPatternBlock;
