@@ -132,7 +132,7 @@ FOUNDATION_EXPORT NSString * const SWHttpTrafficRecorderErrorDomain;
 - (void)startRecordingAtPath:(NSString *)recordingPath error:(NSError **) error;
 
 /**
- *  Method to start recording and saves recorded files at a specified location using default session configuration.
+ *  Method to start recording and saves recorded files at a specified location using given session configuration.
  *  @param recordingPath The path where recorded files are saved.
  *  @param sessionConfig The NSURLSessionConfiguration which will be modified.
  *  @param error An out value that returns any error encountered while accessing the recordingPath. Returns an NSError object if any error; otherwise returns nil.
@@ -140,9 +140,42 @@ FOUNDATION_EXPORT NSString * const SWHttpTrafficRecorderErrorDomain;
 - (void)startRecordingAtPath:(NSString *)recordingPath forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig error:(NSError **) error;
 
 /**
+ *  Method to start recording and saves recorded files at a specified location using default session configuration.
+ *  @param recordingPath The path where recorded files are saved.
+ *  @param sessionConfig The NSURLSessionConfiguration which will be modified.
+ *  @param replacementDict The dictionary containing regex/token pairs for replacement.
+ *  @param error An out value that returns any error encountered while accessing the recordingPath. Returns an NSError object if any error; otherwise returns nil.
+ */
+- (void)startRecordingAtPath:(NSString *)recordingPath forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig replacingWithDictionary: (NSDictionary *) replacementDict error:(NSError **) error;
+
+/**
  *  Method to stop recording.
  */
 - (void)stopRecording;
+
+/**
+ *  Method to add a key/token pair to the list of token replacements
+ *  @param regex The regex to be replaced
+ *  @param replacementString The string to replace the regex
+ */
+- (void)replaceRegexMatching:(NSRegularExpression *)regex withString:(NSString *)replacementString;
+
+/**
+ *  Method to remove a key/token pair from the list of token replacements
+ *  @param regex The key to be removed
+ */
+- (void)removeRegex:(NSRegularExpression *)regex;
+
+/**
+ *  Method to remove the regex key/token pairs in a given array from the list of token replacements
+ *  @param regexArray The Array of regex's to be removed
+ */
+- (void)removeRegexInArray:(NSArray *)regexArray;
+
+/**
+ *  Method to clear the list of token replacements
+ */
+- (void)clearRegexAndStrings;
 
 /**
  *  A Boolean value which indicates whether the recording is recording traffic.

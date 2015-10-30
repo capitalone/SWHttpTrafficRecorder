@@ -37,6 +37,8 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
 @property(nonatomic, assign) int fileNo;
 @property(nonatomic, strong) NSOperationQueue *fileCreationQueue;
 @property(nonatomic, strong) NSURLSessionConfiguration *sessionConfig;
+@property(nonatomic, strong) NSMutableDictionary *replacementDict;
+@property(nonatomic, assign) NSUInteger uniqueSessionNumber;
 @end
 
 @interface SWRecordingProtocol : NSURLProtocol @end
@@ -52,6 +54,7 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
         shared.isRecording = NO;
         shared.fileNo = 0;
         shared.fileCreationQueue = [[NSOperationQueue alloc] init];
+        shared.uniqueSessionNumber = (NSUInteger)[NSDate timeIntervalSinceReferenceDate];
         shared.recordingFormat = SWHTTPTrafficRecordingFormatMocktail;
     });
     return shared;
@@ -97,6 +100,11 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
     self.isRecording = YES;
 }
 
+- (void)startRecordingAtPath:(NSString *)recordingPath forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig replacingWithDictionary: (NSDictionary *) replacementDict error:(NSError **) error {
+    self.replacementDict = replacementDict;
+    [self startRecordingAtPath:recordingPath forSessionConfiguration:sessionConfig error:error];
+}
+
 
 - (void)stopRecording{
     if(self.isRecording){
@@ -109,6 +117,9 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
         else {
             [NSURLProtocol unregisterClass:[SWRecordingProtocol class]];
         }
+        if(self.replacementDict) {
+            self.replacementDict = nil;
+        }
         
     }
     self.isRecording = NO;
@@ -118,6 +129,32 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
     @synchronized(self) {
         return self.fileNo++;
     }
+}
+
+- (void)replaceRegexMatching:(NSRegularExpression *) regex withString:(NSString *) replacementString {
+    if(!self.replacementDict) self.replacementDict = [[NSMutableDictionary alloc] init];
+    [self.replacementDict setValue:regex forKey:replacementString];
+}
+
+- (void)removeRegex:(NSRegularExpression *)regex {
+    if(!self.replacementDict) self.replacementDict = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary *modifiedDict = [[NSMutableDictionary alloc] initWithDictionary:self.replacementDict];
+    for(NSString *key in modifiedDict) {
+        if([[self.replacementDict objectForKey:key] pattern] == [regex pattern]) {
+            [self.replacementDict removeObjectForKey:key];
+        }
+    }
+}
+
+- (void)removeRegexInArray:(NSArray *)regexArray {
+    for(NSRegularExpression *regex in regexArray) {
+        [self removeRegex:regex];
+    }
+}
+
+- (void)clearRegexAndStrings {
+    if(!self.replacementDict) self.replacementDict = [[NSMutableDictionary alloc] init];
+    [self.replacementDict removeAllObjects];
 }
 
 @end
@@ -257,7 +294,7 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
         fileName = @"Mocktail";
     }
 
-    fileName = [NSString stringWithFormat:@"%@_%ld_%d", fileName,  (long)[NSDate timeIntervalSinceReferenceDate], [[SWHttpTrafficRecorder sharedRecorder] increaseFileNo]];
+    fileName = [NSString stringWithFormat:@"%@_%ld_%d", fileName, [[SWHttpTrafficRecorder sharedRecorder] uniqueSessionNumber], [[SWHttpTrafficRecorder sharedRecorder] increaseFileNo]];
     
     NSString *(^fileNamingBlock)(NSURLRequest *request, NSString *defaultName) = [SWHttpTrafficRecorder sharedRecorder].fileNamingBlock;
     
@@ -363,11 +400,18 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     [tail appendFormat:@"%@\n", request.HTTPMethod];
     [tail appendFormat:@"%@\n", [self getURLRegexPattern:request]];
     [tail appendFormat:@"%ld\n", (long)response.statusCode];
-    [tail appendFormat:@"%@%@\n\n", response.MIMEType, [self toBase64Body:request andResponse:response] ? @";base64": @""];
+    NSEnumerator *headerKeys = [response.allHeaderFields keyEnumerator];
+    for (NSString *key in headerKeys) {
+        [tail appendFormat:@"%@: %@\n", key, (NSString*)[response.allHeaderFields objectForKey:key]];
+    }
+    
+    [tail appendString:@"\n"];
     
     data = [self doBase64:data request:request response:response];
     
     data = [self doJSONPrettyPrint:data request:request response:response];
+    
+    data = [self replaceRegexInData:data];
     
     [tail appendFormat:@"%@", data ? [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding] : @""];
     
@@ -382,8 +426,40 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     }];
 }
 
+-(NSData *)replaceRegexInData: (NSData *) data {
+    if(![[SWHttpTrafficRecorder sharedRecorder] replacementDict]) {
+        return data;
+    }
+    else {
+        NSString *dataString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        for(NSString *key in [[SWHttpTrafficRecorder sharedRecorder] replacementDict]) {
+            dataString = [[[[SWHttpTrafficRecorder sharedRecorder] replacementDict] objectForKey:key] stringByReplacingMatchesInString:dataString options:0 range:NSMakeRange(0, [dataString length]) withTemplate:key];
+        }
+        data = [dataString dataUsingEncoding:NSUTF8StringEncoding];
+        return data;
+    }
+}
+
 -(NSString *)getURLRegexPattern:(NSURLRequest *)request{
-    NSString *urlPattern = request.URL.path;
+    NSString *urlPattern = request.URL.absoluteString;
+    if (request.URL.query != nil && request.URL.query.length > 0) {
+        urlPattern = [urlPattern stringByReplacingOccurrencesOfString:request.URL.query withString:@""];
+    }
+    
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"/"
+                                                                           options:NSRegularExpressionCaseInsensitive
+                                                                             error:nil];
+    NSArray *matches = [regex matchesInString:urlPattern
+                                      options:NSMatchingReportCompletion
+                                        range:NSMakeRange(0, urlPattern.length)];
+    
+    if ([matches count] <= 2) {
+        return nil;
+    }
+    
+    urlPattern = [urlPattern substringFromIndex:((NSTextCheckingResult*)matches[2]).range.location];
+    urlPattern = [urlPattern substringToIndex:(urlPattern.length - 1)];
+    
     if(request.URL.query){
         NSArray *queryArray = [request.URL.query componentsSeparatedByString:@"&"];
         NSMutableArray *processedQueryArray = [[NSMutableArray alloc] initWithCapacity:queryArray.count];
@@ -392,7 +468,7 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
             part = [urlRegex stringByReplacingMatchesInString:part options:0 range:NSMakeRange(0, part.length) withTemplate:@"$1=.*"];
             [processedQueryArray addObject:part];
         }];
-        urlPattern = [NSString stringWithFormat:@"%@\\?%@", request.URL.path, [processedQueryArray componentsJoinedByString:@"&"]];
+        urlPattern = [NSString stringWithFormat:@"%@\\?%@", urlPattern, [processedQueryArray componentsJoinedByString:@"&"]];
     }
     
     NSString *(^urlRegexPatternBlock)(NSURLRequest *request, NSString *defaultPattern) = [SWHttpTrafficRecorder sharedRecorder].urlRegexPatternBlock;
@@ -400,6 +476,8 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     if(urlRegexPatternBlock){
         urlPattern = urlRegexPatternBlock(request, urlPattern);
     }
+    
+    urlPattern = [urlPattern stringByAppendingString:@"$"];
     
     return urlPattern;
 }
