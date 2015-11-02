@@ -53,6 +53,7 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
         shared.isRecording = NO;
         shared.fileNo = 0;
         shared.fileCreationQueue = [[NSOperationQueue alloc] init];
+        shared.uniqueSessionNumber = (NSUInteger)[NSDate timeIntervalSinceReferenceDate];
         shared.recordingFormat = SWHTTPTrafficRecordingFormatMocktail;
     });
     return shared;
