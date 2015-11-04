@@ -132,7 +132,7 @@ FOUNDATION_EXPORT NSString * const SWHttpTrafficRecorderErrorDomain;
 - (void)startRecordingAtPath:(NSString *)recordingPath error:(NSError **) error;
 
 /**
- *  Method to start recording and saves recorded files at a specified location using default session configuration.
+ *  Method to start recording and saves recorded files at a specified location using given session configuration.
  *  @param recordingPath The path where recorded files are saved.
  *  @param sessionConfig The NSURLSessionConfiguration which will be modified.
  *  @param error An out value that returns any error encountered while accessing the recordingPath. Returns an NSError object if any error; otherwise returns nil.
@@ -153,6 +153,11 @@ FOUNDATION_EXPORT NSString * const SWHttpTrafficRecorderErrorDomain;
  *  A Enum value which indicates the format the recording is using to record traffic.
  */
 @property(nonatomic, assign) SWHTTPTrafficRecordingFormat recordingFormat;
+
+/**
+ *  A Dictionary containing Regex/Token pairs for replacement in response data
+ */
+@property(nonatomic, assign) NSMutableDictionary *replacementDict;
 
 /**
  *  The delegate where the recording progress are reported. 

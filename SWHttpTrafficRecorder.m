@@ -103,7 +103,6 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
     self.isRecording = YES;
 }
 
-
 - (void)stopRecording{
     if(self.isRecording){
         if(self.sessionConfig) {
@@ -115,7 +114,6 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
         else {
             [NSURLProtocol unregisterClass:[SWRecordingProtocol class]];
         }
-        
     }
     self.isRecording = NO;
 }
@@ -375,6 +373,8 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     
     data = [self doJSONPrettyPrint:data request:request response:response];
     
+    data = [self replaceRegexWithTokensInData:data];
+    
     [tail appendFormat:@"%@", data ? [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding] : @""];
     
     NSDictionary *userInfo = @{SWHTTPTrafficRecordingProgressRequestKey: self.request,
@@ -386,6 +386,23 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     [self createFileAt:filePath usingData:[tail dataUsingEncoding:NSUTF8StringEncoding] completionHandler:^(BOOL created) {
         [self.class updateRecorderProgressDelegate:(created ? SWHTTPTrafficRecordingProgressRecorded : SWHTTPTrafficRecordingProgressFailedToRecord) userInfo: userInfo];
     }];
+}
+
+-(NSData *)replaceRegexWithTokensInData: (NSData *) data {
+    SWHttpTrafficRecorder *recorder = [SWHttpTrafficRecorder sharedRecorder];
+    if(![recorder replacementDict]) {
+        return data;
+    }
+    else {
+        NSString *dataString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        for(NSString *key in [recorder replacementDict]) {
+            if([[[recorder replacementDict] objectForKey: key] isKindOfClass:[NSRegularExpression class]]) {
+                dataString = [[[recorder replacementDict] objectForKey:key] stringByReplacingMatchesInString:dataString options:0 range:NSMakeRange(0, [dataString length]) withTemplate:key];
+            }
+        }
+        data = [dataString dataUsingEncoding:NSUTF8StringEncoding];
+        return data;
+    }
 }
 
 -(NSString *)getURLRegexPattern:(NSURLRequest *)request{
@@ -406,6 +423,8 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     if(urlRegexPatternBlock){
         urlPattern = urlRegexPatternBlock(request, urlPattern);
     }
+    
+    urlPattern = [urlPattern stringByAppendingString:@"$"];
     
     return urlPattern;
 }
