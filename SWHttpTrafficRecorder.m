@@ -37,7 +37,7 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
 @property(nonatomic, assign) int fileNo;
 @property(nonatomic, strong) NSOperationQueue *fileCreationQueue;
 @property(nonatomic, strong) NSURLSessionConfiguration *sessionConfig;
-@property(nonatomic, assign) NSUInteger uniqueSessionNumber;
+@property(nonatomic, assign) NSUInteger runTimeStamp;
 @end
 
 @interface SWRecordingProtocol : NSURLProtocol @end
@@ -53,7 +53,7 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
         shared.isRecording = NO;
         shared.fileNo = 0;
         shared.fileCreationQueue = [[NSOperationQueue alloc] init];
-        shared.uniqueSessionNumber = (NSUInteger)[NSDate timeIntervalSinceReferenceDate];
+        shared.runTimeStamp = 0;
         shared.recordingFormat = SWHTTPTrafficRecordingFormatMocktail;
     });
     return shared;
@@ -95,7 +95,11 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
         else {
             [NSURLProtocol registerClass:[SWRecordingProtocol class]];
         }
+
+        self.fileNo = 0;
+        self.runTimeStamp = (NSUInteger)[NSDate timeIntervalSinceReferenceDate];
     }
+
     self.isRecording = YES;
 }
 
@@ -259,7 +263,7 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
         fileName = @"Mocktail";
     }
 
-    fileName = [NSString stringWithFormat:@"%@_%ld_%d", fileName, [[SWHttpTrafficRecorder sharedRecorder] uniqueSessionNumber], [[SWHttpTrafficRecorder sharedRecorder] increaseFileNo]];
+    fileName = [NSString stringWithFormat:@"%@_%ld_%d", fileName, [SWHttpTrafficRecorder sharedRecorder].runTimeStamp, [[SWHttpTrafficRecorder sharedRecorder] increaseFileNo]];
     
     NSString *(^fileNamingBlock)(NSURLRequest *request, NSString *defaultName) = [SWHttpTrafficRecorder sharedRecorder].fileNamingBlock;
     
