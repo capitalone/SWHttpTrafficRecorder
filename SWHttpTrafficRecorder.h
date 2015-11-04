@@ -155,7 +155,7 @@ FOUNDATION_EXPORT NSString * const SWHttpTrafficRecorderErrorDomain;
 @property(nonatomic, assign) SWHTTPTrafficRecordingFormat recordingFormat;
 
 /**
- *  A Boolean value which indicates whether the recording is recording traffic.
+ *  A Dictionary containing Regex/Token pairs for replacement in response data
  */
 @property(nonatomic, assign) NSMutableDictionary *replacementDict;
 

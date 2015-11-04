@@ -108,10 +108,6 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
         else {
             [NSURLProtocol unregisterClass:[SWRecordingProtocol class]];
         }
-        if(self.replacementDict) {
-            self.replacementDict = nil;
-        }
-        
     }
     self.isRecording = NO;
 }
