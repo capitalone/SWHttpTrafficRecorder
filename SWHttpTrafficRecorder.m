@@ -37,7 +37,6 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
 @property(nonatomic, assign) int fileNo;
 @property(nonatomic, strong) NSOperationQueue *fileCreationQueue;
 @property(nonatomic, strong) NSURLSessionConfiguration *sessionConfig;
-@property(nonatomic, strong) NSMutableDictionary *replacementDict;
 @end
 
 @interface SWRecordingProtocol : NSURLProtocol @end
@@ -98,12 +97,6 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
     self.isRecording = YES;
 }
 
-- (void)startRecordingAtPath:(NSString *)recordingPath forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig replacingWithDictionary: (NSDictionary *) replacementDict error:(NSError **) error {
-    self.replacementDict = replacementDict;
-    [self startRecordingAtPath:recordingPath forSessionConfiguration:sessionConfig error:error];
-}
-
-
 - (void)stopRecording{
     if(self.isRecording){
         if(self.sessionConfig) {
@@ -127,32 +120,6 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
     @synchronized(self) {
         return self.fileNo++;
     }
-}
-
-- (void)replaceRegexMatching:(NSRegularExpression *) regex withString:(NSString *) replacementString {
-    if(!self.replacementDict) self.replacementDict = [[NSMutableDictionary alloc] init];
-    [self.replacementDict setValue:regex forKey:replacementString];
-}
-
-- (void)removeRegex:(NSRegularExpression *)regex {
-    if(!self.replacementDict) self.replacementDict = [[NSMutableDictionary alloc] init];
-    NSMutableDictionary *modifiedDict = [[NSMutableDictionary alloc] initWithDictionary:self.replacementDict];
-    for(NSString *key in modifiedDict) {
-        if([[self.replacementDict objectForKey:key] pattern] == [regex pattern]) {
-            [self.replacementDict removeObjectForKey:key];
-        }
-    }
-}
-
-- (void)removeRegexInArray:(NSArray *)regexArray {
-    for(NSRegularExpression *regex in regexArray) {
-        [self removeRegex:regex];
-    }
-}
-
-- (void)clearRegexAndStrings {
-    if(!self.replacementDict) self.replacementDict = [[NSMutableDictionary alloc] init];
-    [self.replacementDict removeAllObjects];
 }
 
 @end
@@ -404,7 +371,7 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     
     data = [self doJSONPrettyPrint:data request:request response:response];
     
-    data = [self replaceRegexInData:data];
+    data = [self replaceRegexWithTokensInData:data];
     
     [tail appendFormat:@"%@", data ? [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding] : @""];
     
@@ -419,14 +386,17 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
     }];
 }
 
--(NSData *)replaceRegexInData: (NSData *) data {
-    if(![[SWHttpTrafficRecorder sharedRecorder] replacementDict]) {
+-(NSData *)replaceRegexWithTokensInData: (NSData *) data {
+    SWHttpTrafficRecorder *recorder = [SWHttpTrafficRecorder sharedRecorder];
+    if(![recorder replacementDict]) {
         return data;
     }
     else {
         NSString *dataString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        for(NSString *key in [[SWHttpTrafficRecorder sharedRecorder] replacementDict]) {
-            dataString = [[[[SWHttpTrafficRecorder sharedRecorder] replacementDict] objectForKey:key] stringByReplacingMatchesInString:dataString options:0 range:NSMakeRange(0, [dataString length]) withTemplate:key];
+        for(NSString *key in [recorder replacementDict]) {
+            if([[[recorder replacementDict] objectForKey: key] isKindOfClass:[NSRegularExpression class]]) {
+                dataString = [[[recorder replacementDict] objectForKey:key] stringByReplacingMatchesInString:dataString options:0 range:NSMakeRange(0, [dataString length]) withTemplate:key];
+            }
         }
         data = [dataString dataUsingEncoding:NSUTF8StringEncoding];
         return data;
