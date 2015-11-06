@@ -2,7 +2,7 @@ SWHttpTrafficRecorder provides an easy way to record all the HTTP traffic while 
 
 ### Installing In Your Projects
 
-The library contains only two files (SWHttpTrafficRecorder.h and SWHttpTrafficRecorder.m). So you can just drop them anywhere in your project and it is done. Will provide a CocoaPods spec later on.
+[CocoaPods](http://cocoapods.org) is the recommended way to add SWHttpTrafficRecorder to your project. Or since the library contains only two files (SWHttpTrafficRecorder.h and SWHttpTrafficRecorder.m), you can just drop them anywhere in your project and it is done. 
 
 ### Usage Example
 
