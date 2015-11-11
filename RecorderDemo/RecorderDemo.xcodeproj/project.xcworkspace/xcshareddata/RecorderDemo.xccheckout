@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>EF22B21D-C733-41F2-8EE4-199E4D942DA6</string>
+	<key>IDESourceControlProjectName</key>
+	<string>project</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>18262DBAF22C3D1C9D9F59C4A10833A3F537723F</key>
+		<string>github.com:JinlianWang/SWHttpTrafficRecorder.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>RecorderDemo/RecorderDemo.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>18262DBAF22C3D1C9D9F59C4A10833A3F537723F</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>github.com:JinlianWang/SWHttpTrafficRecorder.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>18262DBAF22C3D1C9D9F59C4A10833A3F537723F</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>18262DBAF22C3D1C9D9F59C4A10833A3F537723F</string>
+			<key>IDESourceControlWCCName</key>
+			<string>SWHttpTrafficRecorder</string>
+		</dict>
+	</array>
+</dict>
+</plist>

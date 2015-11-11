@@ -1,0 +1,5 @@
+language: objective-c
+xcode_project: RecorderDemo/RecorderDemo.xcodeproj
+xcode_scheme: RecorderDemo
+xcode_sdk: iphonesimulator
+osx_image: xcode7
