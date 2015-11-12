@@ -40,16 +40,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, SWHttpTrafficRecordingPro
     }
 
     func updateRecordingProgress(currentProgress: SWHTTPTrafficRecordingProgressKind, userInfo info: [NSObject : AnyObject]!) {
-        guard let request = info[SWHTTPTrafficRecordingProgressRequestKey], url = request.URL else {
+        guard let request = info[SWHTTPTrafficRecordingProgressRequestKey] as? NSURLRequest, urlString = request.URL?.absoluteString else {
             return
         }
         
         let progress =  ["Received","Skipped","Started","Loaded","Recorded", "FailedToLoad", "FailedToRecord"][currentProgress.rawValue-1]
         
-        if let path = info[SWHTTPTrafficRecordingProgressFilePathKey] {
-            print("Progress:\(progress), request: \(url!.absoluteString) at \(path)")
+        if let path = info[SWHTTPTrafficRecordingProgressFilePathKey] as? String{
+            print("Progress:\(progress), request: \(urlString) at \(path)")
         } else {
-            print("Progress:\(progress), request: \(url!.absoluteString)")
+            print("Progress:\(progress), request: \(urlString)")
         }
     }
     
