@@ -122,14 +122,14 @@ FOUNDATION_EXPORT NSString * const SWHttpTrafficRecorderErrorDomain;
 /**
  *  Method to start recording using default path.
  */
-- (void)startRecording;
+- (BOOL)startRecording;
 
 /**
  *  Method to start recording and saves recorded files at a specified location.
  *  @param path The path where recorded files are saved.
  *  @param error An out value that returns any error encountered while accessing the recordingPath. Returns an NSError object if any error; otherwise returns nil.
  */
-- (void)startRecordingAtPath:(NSString *)recordingPath error:(NSError **) error;
+- (BOOL)startRecordingAtPath:(NSString *)recordingPath error:(NSError **) error;
 
 /**
  *  Method to start recording and saves recorded files at a specified location using given session configuration.
@@ -137,7 +137,7 @@ FOUNDATION_EXPORT NSString * const SWHttpTrafficRecorderErrorDomain;
  *  @param sessionConfig The NSURLSessionConfiguration which will be modified.
  *  @param error An out value that returns any error encountered while accessing the recordingPath. Returns an NSError object if any error; otherwise returns nil.
  */
-- (void)startRecordingAtPath:(NSString *)recordingPath forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig error:(NSError **) error;
+- (BOOL)startRecordingAtPath:(NSString *)recordingPath forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig error:(NSError **) error;
 
 /**
  *  Method to stop recording.

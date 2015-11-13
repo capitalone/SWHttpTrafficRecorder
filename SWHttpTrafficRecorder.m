@@ -59,15 +59,15 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
     return shared;
 }
 
-- (void)startRecording{
-    [self startRecordingAtPath:nil forSessionConfiguration:nil error:nil];
+- (BOOL)startRecording{
+    return [self startRecordingAtPath:nil forSessionConfiguration:nil error:nil];
 }
 
-- (void)startRecordingAtPath:(NSString *)recordingPath error:(NSError **) error {
-    [self startRecordingAtPath:recordingPath forSessionConfiguration:nil error:error];
+- (BOOL)startRecordingAtPath:(NSString *)recordingPath error:(NSError **) error {
+    return [self startRecordingAtPath:recordingPath forSessionConfiguration:nil error:error];
 }
 
-- (void)startRecordingAtPath:(NSString *)recordingPath forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig error:(NSError **) error {
+- (BOOL)startRecordingAtPath:(NSString *)recordingPath forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig error:(NSError **) error {
     if(!self.isRecording){
         if(recordingPath){
             self.recordingPath = recordingPath;
@@ -75,13 +75,15 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
             if(![fileManager fileExistsAtPath:recordingPath]){
                 NSError *bError = nil;
                 [fileManager createDirectoryAtPath:recordingPath withIntermediateDirectories:YES attributes:nil error:&bError];
-                if(bError){
+                if(bError && error){
                     *error = [NSError errorWithDomain:SWHttpTrafficRecorderErrorDomain code:SWHttpTrafficRecorderErrorPathFailedToCreate userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Path '%@' does not exist and error while creating it.", recordingPath]}];
-                    return;
                 }
+                return NO;
             } else if(![fileManager isWritableFileAtPath:recordingPath]){
-                *error = [NSError errorWithDomain:SWHttpTrafficRecorderErrorDomain code:SWHttpTrafficRecorderErrorPathNotWritable userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Path '%@' is not writable.", recordingPath]}];
-                return;
+                if (error){
+                    *error = [NSError errorWithDomain:SWHttpTrafficRecorderErrorDomain code:SWHttpTrafficRecorderErrorPathNotWritable userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Path '%@' is not writable.", recordingPath]}];
+                }
+                return NO;
             }
         } else {
             self.recordingPath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
@@ -101,6 +103,8 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
     }
 
     self.isRecording = YES;
+    
+    return YES;
 }
 
 - (void)stopRecording{
@@ -463,6 +467,7 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
 - (NSString *)statusLineFromResponse:(NSHTTPURLResponse*)response{
     CFHTTPMessageRef message = CFHTTPMessageCreateResponse(kCFAllocatorDefault, [response statusCode], NULL, kCFHTTPVersion1_1);
     NSString *statusLine = (__bridge_transfer NSString *)CFHTTPMessageCopyResponseStatusLine(message);
+    CFRelease(message);
     return statusLine;
 }
 
