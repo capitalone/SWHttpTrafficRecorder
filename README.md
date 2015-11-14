@@ -1,3 +1,5 @@
+# SWHttpTrafficRecorder [![Build Status](https://travis-ci.org/JinlianWang/SWHttpTrafficRecorder.svg?branch=master)](https://travis-ci.org/JinlianWang/SWHttpTrafficRecorder)
+
 SWHttpTrafficRecorder provides an easy way to record all the HTTP(s) traffic in the device’s file system while the user is using your app at the same time. It can be used for different purposes, like testing, replaying the workflow or logging an app's network activity for debugging purposes.  See [OHHTTPStubs](https://github.com/AliSoftware/OHHTTPStubs), [Nocilla](https://github.com/luisobo/Nocilla) or [Mocktail](https://github.com/puls/objc-mocktail) for examples of how the recorded files can be used. This project has been developed solely for testing purposes. We highly recommend that this project is not used in production environment. However, if you choose to use it in production environment, there are security considerations that must be taken into account. 
 
 ### Features
