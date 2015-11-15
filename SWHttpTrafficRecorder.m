@@ -38,6 +38,7 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
 @property(nonatomic, strong) NSOperationQueue *fileCreationQueue;
 @property(nonatomic, strong) NSURLSessionConfiguration *sessionConfig;
 @property(nonatomic, assign) NSUInteger runTimeStamp;
+@property(nonatomic, strong) NSDictionary *fileExtensionMapping;
 @end
 
 @interface SWRecordingProtocol : NSURLProtocol @end
@@ -126,6 +127,19 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
     @synchronized(self) {
         return self.fileNo++;
     }
+}
+
+- (NSDictionary *)fileExtensionMapping{
+    if(!_fileExtensionMapping){
+        _fileExtensionMapping = @{
+                                  @"application/json": @"json", @"image/png": @"png", @"image/jpeg" : @"jpg",
+                                  @"image/gif": @"gif", @"image/bmp": @"bmp", @"text/plain": @"txt",
+                                  @"text/css": @"css", @"text/html": @"html", @"application/javascript": @"js",
+                                  @"text/javascript": @"js", @"application/xml": @"xml", @"text/xml": @"xml",
+                                  @"image/tiff": @"tiff", @"image/x-tiff": @"tiff"
+                                  };
+    }
+    return _fileExtensionMapping;
 }
 
 @end
@@ -258,7 +272,7 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
 
 #pragma mark - File Creation Utility Methods
 
--(NSString *)getFileName:(NSURLRequest *)request{
+-(NSString *)getFileName:(NSURLRequest *)request response:(NSHTTPURLResponse *)response{
     NSString *fileName = [request.URL lastPathComponent];
     
     if(!fileName || [self isNotValidFileName: fileName]){
@@ -267,10 +281,12 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
 
     fileName = [NSString stringWithFormat:@"%@_%ld_%d", fileName, [SWHttpTrafficRecorder sharedRecorder].runTimeStamp, [[SWHttpTrafficRecorder sharedRecorder] increaseFileNo]];
     
-    NSString *(^fileNamingBlock)(NSURLRequest *request, NSString *defaultName) = [SWHttpTrafficRecorder sharedRecorder].fileNamingBlock;
+    fileName = [fileName stringByAppendingPathExtension:[self getFileExtension:request response:response]];
+    
+    NSString *(^fileNamingBlock)(NSURLRequest *request, NSURLResponse *response, NSString *defaultName) = [SWHttpTrafficRecorder sharedRecorder].fileNamingBlock;
     
     if(fileNamingBlock){
-        fileName = fileNamingBlock(request, fileName);
+        fileName = fileNamingBlock(request, response, fileName);
     }
     return fileName;
 }
@@ -281,22 +297,23 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
 
 -(NSString *)getFilePath:(NSURLRequest *)request response:(NSHTTPURLResponse *)response{
     NSString *recordingPath = [SWHttpTrafficRecorder sharedRecorder].recordingPath;
-    NSString *filePath = [[recordingPath stringByAppendingPathComponent:[self getFileName:request]] stringByAppendingPathExtension:[self getFileExtension:request response:response]];
+    NSString *filePath = [recordingPath stringByAppendingPathComponent:[self getFileName:request response:response]];
 
     return filePath;
 }
 
 -(NSString *)getFileExtension:(NSURLRequest *)request response:(NSHTTPURLResponse *)response{
     SWHTTPTrafficRecordingFormat format = [SWHttpTrafficRecorder sharedRecorder].recordingFormat;
-    if(format == SWHTTPTrafficRecordingFormatBodyOnly && [response.MIMEType isEqualToString:@"application/json"]){
-        return @"json";
+    if(format == SWHTTPTrafficRecordingFormatBodyOnly){
+        /* Based on http://blog.ablepear.com/2010/08/how-to-get-file-extension-for-mime-type.html, we may be able to get the file extension from mime type. Use a fixed mapping for simpilicity for now unless there is a need later on */
+        return [SWHttpTrafficRecorder sharedRecorder].fileExtensionMapping[response.MIMEType] ?: @"unknown";
     } else if(format == SWHTTPTrafficRecordingFormatMocktail){
         return @"tail";
     } else if(format == SWHTTPTrafficRecordingFormatHTTPMessage){
         return @"response";
     }
     
-    return @"txt";
+    return @"unknown";
 }
 
 -(BOOL)toBase64Body:(NSURLRequest *)request andResponse:(NSHTTPURLResponse *)response{
@@ -347,8 +364,6 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
 
 -(void)createBodyOnlyFileWithRequest:(NSURLRequest*)request response:(NSHTTPURLResponse*)response data:(NSData*)data atFilePath:(NSString *)filePath
 {
-    data = [self doBase64:data request:request response:response];
-    
     data = [self doJSONPrettyPrint:data request:request response:response];
     
     NSDictionary *userInfo = @{SWHTTPTrafficRecordingProgressRequestKey: self.request,
@@ -446,11 +461,10 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
         [dataString appendFormat:@"%@: %@\n", key, headers[key]];
     }
     
-    [dataString appendString:@"\n\n"];
+    [dataString appendString:@"\n"];
     
-    data = [self doBase64:data request:request response:response];
-    
-    [dataString appendFormat:@"%@", data ? [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding] : @""];
+    NSMutableData *responseData = [NSMutableData dataWithData:[dataString dataUsingEncoding:NSUTF8StringEncoding]];
+    [responseData appendData:data];
     
     NSDictionary *userInfo = @{SWHTTPTrafficRecordingProgressRequestKey: self.request,
                                SWHTTPTrafficRecordingProgressResponseKey: self.response,
@@ -459,7 +473,7 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
                                SWHTTPTrafficRecordingProgressFilePathKey: filePath
                                };
     
-    [self createFileAt:filePath usingData:[dataString dataUsingEncoding:NSUTF8StringEncoding] completionHandler:^(BOOL created) {
+    [self createFileAt:filePath usingData:responseData completionHandler:^(BOOL created) {
         [self.class updateRecorderProgressDelegate:(created ? SWHTTPTrafficRecordingProgressRecorded : SWHTTPTrafficRecordingProgressFailedToRecord) userInfo:userInfo];
     }];
 }
