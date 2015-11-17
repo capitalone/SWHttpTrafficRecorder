@@ -279,7 +279,7 @@ static NSString * const SWRecordingLProtocolHandledKey = @"SWRecordingLProtocolH
         fileName = @"Mocktail";
     }
 
-    fileName = [NSString stringWithFormat:@"%@_%ld_%d", fileName, [SWHttpTrafficRecorder sharedRecorder].runTimeStamp, [[SWHttpTrafficRecorder sharedRecorder] increaseFileNo]];
+    fileName = [NSString stringWithFormat:@"%@_%lu_%d", fileName, (unsigned long)[SWHttpTrafficRecorder sharedRecorder].runTimeStamp, [[SWHttpTrafficRecorder sharedRecorder] increaseFileNo]];
     
     fileName = [fileName stringByAppendingPathExtension:[self getFileExtension:request response:response]];
     
