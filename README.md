@@ -2,6 +2,8 @@
 
 SWHttpTrafficRecorder provides an easy way to record all the HTTP(s) traffic in the device’s file system while the user is using your app at the same time. It can be used for different purposes, like testing, replaying the workflow or logging an app's network activity for debugging purposes.  See [OHHTTPStubs](https://github.com/AliSoftware/OHHTTPStubs), [Nocilla](https://github.com/luisobo/Nocilla) or [Mocktail](https://github.com/puls/objc-mocktail) for examples of how the recorded files can be used (this library is inspired while using the above frameworks). This library has been developed solely for testing purposes. We highly recommend against using it in production environment. However, if you choose to include it anyway, there are security considerations that must be taken into account. 
 
+**Note**: if you like this library, please feel free to fork or star it using the buttons on the top of this page. 
+
 ### Setup
 
 #### Installing In Your Projects
@@ -24,7 +26,7 @@ Even though the library is highly customizable, you can get started just by inse
 SWHttpTrafficRecorder.sharedRecorder().startRecording()
 ```
 
-Note: It works with NSURLConnection and NSURLSession, AFNetworking, or any networking framework that use Cocoa's URL Loading System. To use with NSURLSession-based request, check out its `- (BOOL)startRecordingAtPath:(NSString *)recordingPath forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig error:(NSError **) error` method. 
+**Note**: It works with NSURLConnection and NSURLSession, AFNetworking, or any networking framework that use Cocoa's URL Loading System. To use with NSURLSession-based request, check out its `- (BOOL)startRecordingAtPath:(NSString *)recordingPath forSessionConfiguration:(NSURLSessionConfiguration *)sessionConfig error:(NSError **) error` method. 
 
 ### Features
 
