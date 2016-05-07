@@ -1,22 +1,28 @@
-#******************************************************************************
- # Copyright 2015 Capital One Services, LLC
- 
- # Licensed under the Apache License, Version 2.0 (the "License");
- # you may not use this file except in compliance with the License.
- # You may obtain a copy of the License at
- 
- # http://www.apache.org/licenses/LICENSE-2.0
- 
- # Unless required by applicable law or agreed to in writing, software
- # distributed under the License is distributed on an "AS IS" BASIS,
- # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- # See the License for the specific language governing permissions and
- # limitations under the License.
- #
- #******************************************************************************/
- 
 language: objective-c
-xcode_project: RecorderDemo/RecorderDemo.xcodeproj
-xcode_scheme: RecorderDemo
-xcode_sdk: iphonesimulator
-osx_image: xcode7
+os: osx
+osx_image: xcode7.3
+env:
+  matrix:
+    - TEST_TYPE=iOS
+    - TEST_TYPE=CocoaPods
+    - TEST_TYPE=Carthage
+install:
+- |
+  if [ "$TEST_TYPE" = "iOS" ]; then
+    gem install xcpretty -N --no-ri --no-rdoc
+    gem update cocoapods
+  elif [ "$TEST_TYPE" = Carthage ]; then    
+    brew install carthage || brew upgrade carthage
+  fi
+script:
+- |
+  if [ "$TEST_TYPE" = "iOS" ]; then
+    set -o pipefail
+    xcodebuild build test -project SWHttpTrafficRecorder.xcodeproj -scheme SWHttpTrafficRecorder -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 4s" | xcpretty -c
+    xcodebuild build -project RecorderDemo/RecorderDemo.xcodeproj -scheme RecorderDemo -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 4s" | xcpretty -c
+  elif [ "$TEST_TYPE" = CocoaPods ]; then
+    pod lib lint SWHttpTrafficRecorder.podspec
+    pod lib lint --use-libraries SWHttpTrafficRecorder.podspec
+  elif [ "$TEST_TYPE" = Carthage ]; then
+    carthage build --no-skip-current
+  fi
