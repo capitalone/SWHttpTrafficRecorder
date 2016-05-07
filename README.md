@@ -8,7 +8,23 @@ SWHttpTrafficRecorder provides an easy way to record all the HTTP(s) traffic in 
 
 #### Installing In Your Projects
 
-[CocoaPods](http://cocoapods.org) is the recommended way to add SWHttpTrafficRecorder to your project. Or since the library contains only two files (SWHttpTrafficRecorder.h and SWHttpTrafficRecorder.m), you can just drop them anywhere in your project and it is done. 
+##### [CocoaPods](http://cocoapods.org)
+The recommended way to add **SWHttpTrafficRecorder** to your project. Add `SWHttpTrafficRecorder` to your `Podfile`:
+
+```ruby
+pod 'SWHttpTrafficRecorder'
+```
+
+##### [Carthage](https://github.com/Carthage/Carthage)
+
+Add this repo to your `Cartfile`:
+
+```ruby
+github "capitalone/SWHttpTrafficRecorder"
+```
+
+##### Manual
+Or since the library contains only two files (`SWHttpTrafficRecorder.h` and `SWHttpTrafficRecorder.m`), you can just drop them anywhere in your project and it is done. 
 
 #### Getting Started
 
