@@ -26,4 +26,4 @@
 
 #endif /* RecorderDemo_Bridging_Header_h */
 
-#import "SWHttpTrafficRecorder.h"
+@import SWHttpTrafficRecorder;
