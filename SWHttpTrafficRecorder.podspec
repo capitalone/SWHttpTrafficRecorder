@@ -27,7 +27,7 @@ Pod::Spec.new do |s|
   s.author       = { 'Sunny Wang' => 'wangjinlian@hotmail.com' }
   s.source       = { :git => "https://github.com/capitalone/SWHttpTrafficRecorder.git", :tag => 'v1.0.1' }
   s.platform     = :ios
-  s.source_files = '*.{h,m}'
+  s.source_files = 'SWHttpTrafficRecorder/*.{h,m}'
   s.ios.deployment_target = '7.0'
   s.requires_arc = true
 end
