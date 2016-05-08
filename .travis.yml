@@ -18,7 +18,8 @@ script:
 - |
   if [ "$TEST_TYPE" = "iOS" ]; then
     set -o pipefail
-    xcodebuild build test -project SWHttpTrafficRecorder.xcodeproj -scheme SWHttpTrafficRecorder -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 4s" | xcpretty -c
+    xcodebuild build -project SWHttpTrafficRecorder.xcodeproj -scheme SWHttpTrafficRecorder -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 4s" | xcpretty -c
+    xcodebuild test  -project SWHttpTrafficRecorder.xcodeproj -scheme SWHttpTrafficRecorder -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 4s" | xcpretty -c
     xcodebuild build -project RecorderDemo/RecorderDemo.xcodeproj -scheme RecorderDemo -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 4s" | xcpretty -c
   elif [ "$TEST_TYPE" = CocoaPods ]; then
     pod lib lint SWHttpTrafficRecorder.podspec
