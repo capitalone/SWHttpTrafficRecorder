@@ -6,7 +6,7 @@
 
 ### Setup
 
-#### Installing In Your Projects
+#### Integrating in your project
 
 ##### [CocoaPods](http://cocoapods.org)
 The recommended way to add **SWHttpTrafficRecorder** to your project. Add `SWHttpTrafficRecorder` to your `Podfile`:
