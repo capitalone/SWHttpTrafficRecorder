@@ -22,6 +22,12 @@
 
 #import <Foundation/Foundation.h>
 
+//! Project version number for SWHttpTrafficRecorder.
+FOUNDATION_EXPORT double SWHttpTrafficRecorderVersionNumber;
+
+//! Project version string for SWHttpTrafficRecorder.
+FOUNDATION_EXPORT const unsigned char SWHttpTrafficRecorderVersionString[];
+
 /**
  * Recording formats that is supported by SWHttpTrafficRecorder.
  */

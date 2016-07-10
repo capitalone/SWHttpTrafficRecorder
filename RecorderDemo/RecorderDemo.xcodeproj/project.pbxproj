@@ -13,7 +13,8 @@
 		1DAE1B171BF38D47004D855F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1DAE1B161BF38D47004D855F /* Assets.xcassets */; };
 		1DAE1B1A1BF38D47004D855F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1DAE1B181BF38D47004D855F /* LaunchScreen.storyboard */; };
 		1DAE1B251BF38D47004D855F /* RecorderDemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DAE1B241BF38D47004D855F /* RecorderDemoTests.swift */; };
-		1DDD40721BF3CF84005336F1 /* SWHttpTrafficRecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DDD40711BF3CF84005336F1 /* SWHttpTrafficRecorder.m */; settings = {ASSET_TAGS = (); }; };
+		46A8ACB31CDE0564009AFA26 /* SWHttpTrafficRecorder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46A8ACAE1CDE053D009AFA26 /* SWHttpTrafficRecorder.framework */; };
+		46A8ACB41CDE0564009AFA26 /* SWHttpTrafficRecorder.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 46A8ACAE1CDE053D009AFA26 /* SWHttpTrafficRecorder.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,7 +25,49 @@
 			remoteGlobalIDString = 1DAE1B0B1BF38D47004D855F;
 			remoteInfo = RecorderDemo;
 		};
+		46A8ACAD1CDE053D009AFA26 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46A8ACA81CDE053D009AFA26 /* SWHttpTrafficRecorder.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 46A8AC5F1CDC9952009AFA26;
+			remoteInfo = SWHttpTrafficRecorder;
+		};
+		46A8ACAF1CDE053D009AFA26 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46A8ACA81CDE053D009AFA26 /* SWHttpTrafficRecorder.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 46A8AC691CDC9952009AFA26;
+			remoteInfo = UnitTests;
+		};
+		46A8ACB11CDE0548009AFA26 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46A8ACA81CDE053D009AFA26 /* SWHttpTrafficRecorder.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 46A8AC5E1CDC9952009AFA26;
+			remoteInfo = SWHttpTrafficRecorder;
+		};
+		46A8ACB51CDE0564009AFA26 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46A8ACA81CDE053D009AFA26 /* SWHttpTrafficRecorder.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 46A8AC5E1CDC9952009AFA26;
+			remoteInfo = SWHttpTrafficRecorder;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		46A8ACB71CDE0564009AFA26 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				46A8ACB41CDE0564009AFA26 /* SWHttpTrafficRecorder.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		1DAE1B0C1BF38D47004D855F /* RecorderDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RecorderDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -38,8 +81,7 @@
 		1DAE1B241BF38D47004D855F /* RecorderDemoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecorderDemoTests.swift; sourceTree = "<group>"; };
 		1DAE1B261BF38D47004D855F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1DAE1B2F1BF3BE2B004D855F /* RecorderDemo-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RecorderDemo-Bridging-Header.h"; sourceTree = "<group>"; };
-		1DDD40701BF3CF84005336F1 /* SWHttpTrafficRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SWHttpTrafficRecorder.h; path = ../../SWHttpTrafficRecorder.h; sourceTree = "<group>"; };
-		1DDD40711BF3CF84005336F1 /* SWHttpTrafficRecorder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SWHttpTrafficRecorder.m; path = ../../SWHttpTrafficRecorder.m; sourceTree = "<group>"; };
+		46A8ACA81CDE053D009AFA26 /* SWHttpTrafficRecorder.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SWHttpTrafficRecorder.xcodeproj; path = ../SWHttpTrafficRecorder.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +89,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				46A8ACB31CDE0564009AFA26 /* SWHttpTrafficRecorder.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,6 +106,7 @@
 		1DAE1B031BF38D47004D855F = {
 			isa = PBXGroup;
 			children = (
+				46A8ACA81CDE053D009AFA26 /* SWHttpTrafficRecorder.xcodeproj */,
 				1DAE1B0E1BF38D47004D855F /* RecorderDemo */,
 				1DAE1B231BF38D47004D855F /* RecorderDemoTests */,
 				1DAE1B0D1BF38D47004D855F /* Products */,
@@ -81,7 +125,6 @@
 		1DAE1B0E1BF38D47004D855F /* RecorderDemo */ = {
 			isa = PBXGroup;
 			children = (
-				1DAE1B301BF3BEA8004D855F /* RecoderLib */,
 				1DAE1B0F1BF38D47004D855F /* AppDelegate.swift */,
 				1DAE1B111BF38D47004D855F /* ViewController.swift */,
 				1DAE1B131BF38D47004D855F /* Main.storyboard */,
@@ -102,13 +145,13 @@
 			path = RecorderDemoTests;
 			sourceTree = "<group>";
 		};
-		1DAE1B301BF3BEA8004D855F /* RecoderLib */ = {
+		46A8ACA91CDE053D009AFA26 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1DDD40701BF3CF84005336F1 /* SWHttpTrafficRecorder.h */,
-				1DDD40711BF3CF84005336F1 /* SWHttpTrafficRecorder.m */,
+				46A8ACAE1CDE053D009AFA26 /* SWHttpTrafficRecorder.framework */,
+				46A8ACB01CDE053D009AFA26 /* UnitTests.xctest */,
 			);
-			name = RecoderLib;
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -121,10 +164,13 @@
 				1DAE1B081BF38D47004D855F /* Sources */,
 				1DAE1B091BF38D47004D855F /* Frameworks */,
 				1DAE1B0A1BF38D47004D855F /* Resources */,
+				46A8ACB71CDE0564009AFA26 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				46A8ACB21CDE0548009AFA26 /* PBXTargetDependency */,
+				46A8ACB61CDE0564009AFA26 /* PBXTargetDependency */,
 			);
 			name = RecorderDemo;
 			productName = RecorderDemo;
@@ -178,6 +224,12 @@
 			mainGroup = 1DAE1B031BF38D47004D855F;
 			productRefGroup = 1DAE1B0D1BF38D47004D855F /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 46A8ACA91CDE053D009AFA26 /* Products */;
+					ProjectRef = 46A8ACA81CDE053D009AFA26 /* SWHttpTrafficRecorder.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				1DAE1B0B1BF38D47004D855F /* RecorderDemo */,
@@ -185,6 +237,23 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		46A8ACAE1CDE053D009AFA26 /* SWHttpTrafficRecorder.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SWHttpTrafficRecorder.framework;
+			remoteRef = 46A8ACAD1CDE053D009AFA26 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		46A8ACB01CDE053D009AFA26 /* UnitTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = UnitTests.xctest;
+			remoteRef = 46A8ACAF1CDE053D009AFA26 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		1DAE1B0A1BF38D47004D855F /* Resources */ = {
@@ -212,7 +281,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				1DAE1B121BF38D47004D855F /* ViewController.swift in Sources */,
-				1DDD40721BF3CF84005336F1 /* SWHttpTrafficRecorder.m in Sources */,
 				1DAE1B101BF38D47004D855F /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -232,6 +300,16 @@
 			isa = PBXTargetDependency;
 			target = 1DAE1B0B1BF38D47004D855F /* RecorderDemo */;
 			targetProxy = 1DAE1B211BF38D47004D855F /* PBXContainerItemProxy */;
+		};
+		46A8ACB21CDE0548009AFA26 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SWHttpTrafficRecorder;
+			targetProxy = 46A8ACB11CDE0548009AFA26 /* PBXContainerItemProxy */;
+		};
+		46A8ACB61CDE0564009AFA26 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SWHttpTrafficRecorder;
+			targetProxy = 46A8ACB51CDE0564009AFA26 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -291,7 +369,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -330,7 +408,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -343,6 +421,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = RecorderDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.CapitalOne.RecorderDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -355,6 +434,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = RecorderDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.CapitalOne.RecorderDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";

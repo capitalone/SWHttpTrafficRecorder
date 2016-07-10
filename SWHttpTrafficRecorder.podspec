@@ -25,9 +25,9 @@ Pod::Spec.new do |s|
   s.homepage     = "https://github.com/capitalone/SWHttpTrafficRecorder"
   s.license      = { :type => 'Apache Licnese 2.0', :file => 'LICENSE' }
   s.author       = { 'Sunny Wang' => 'wangjinlian@hotmail.com' }
-  s.source       = { :git => "https://github.com/capitalone/SWHttpTrafficRecorder.git", :tag => 'v1.0.1' }
+  s.source       = { :git => "https://github.com/capitalone/SWHttpTrafficRecorder.git", :tag => "v#{s.version}" }
   s.platform     = :ios
-  s.source_files = '*.{h,m}'
+  s.source_files = 'SWHttpTrafficRecorder/*.{h,m}'
   s.ios.deployment_target = '7.0'
   s.requires_arc = true
 end
