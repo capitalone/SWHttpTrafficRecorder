@@ -90,18 +90,18 @@ NSString * const SWHttpTrafficRecorderErrorDomain           = @"RECORDER_ERROR_D
         } else {
             self.recordingPath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
         }
-        if(sessionConfig){
-            self.sessionConfig = sessionConfig;
-            NSMutableArray *mutableProtocols = [[NSMutableArray alloc] initWithArray:sessionConfig.protocolClasses];
-            [mutableProtocols insertObject:[SWRecordingProtocol class] atIndex:0];
-            sessionConfig.protocolClasses = mutableProtocols;
-        }
-        else {
-            [NSURLProtocol registerClass:[SWRecordingProtocol class]];
-        }
 
         self.fileNo = 0;
         self.runTimeStamp = (NSUInteger)[NSDate timeIntervalSinceReferenceDate];
+    }
+    if(sessionConfig){
+        self.sessionConfig = sessionConfig;
+        NSMutableOrderedSet *mutableProtocols = [[NSMutableOrderedSet alloc] initWithArray:sessionConfig.protocolClasses];
+        [mutableProtocols insertObject:[SWRecordingProtocol class] atIndex:0];
+        sessionConfig.protocolClasses = [mutableProtocols array];
+    }
+    else {
+        [NSURLProtocol registerClass:[SWRecordingProtocol class]];
     }
 
     self.isRecording = YES;
