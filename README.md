@@ -75,8 +75,7 @@ While creating files for HTTP(s) requests, the recorder uses `NSFileProtectionCo
 The project is in its early stage. We are intending to apply it to different projects both internally and externally, and fix any issues that are found. In addition, we are going to continue to improve it as the following:
 
 1. Create a testing suite for regression to make sure future contributions do not break existing functionalities; 
-2. Find a good solution for customizing recording of headers for Mocktail format (since we do not want to record every header which may not be necessary);
-3. Provide more documentation and sample code through wiki page.
+2. Provide more documentation and sample code through wiki page.
 
 If you want to help with any of the above or have any other ideas over how to enhance it or fix a bug, pull requests/new issues/comments/questions are highly welcome.
 
